@@ -27,7 +27,8 @@
     "nodemailer": "^6.9.10",
     "nodemon": "^3.0.3",
     "otp-generator": "^4.0.1",
+    "pino": "^9.6.0",
     "socket.io": "^4.7.4",
-    "solc": "^0.8.0"
+    "solc": "^0.8.20"
   }
 }

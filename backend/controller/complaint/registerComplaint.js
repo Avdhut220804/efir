@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEN_AI);
+const pino = require('pino');
+const logger = pino({ level: 'info' });
 
 const generateSummary = async (data) => {
   try {
@@ -14,13 +16,12 @@ const generateSummary = async (data) => {
       " " +
       "generate the summary of the complaint in short paragraph";
 
-    // console.log(prompt);
     const result = await model.generateContent(prompt, { maxLength: 100 });
     const response = await result.response;
-    console.log(response.text());
+    logger.info(response.text());
     return response.text();
   } catch (err) {
-    console.error("Error generating summary:", err);
+    logger.error("Error generating summary:", err);
     throw err;
   }
 };
@@ -30,57 +31,20 @@ const getCategories = async (data) => {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const prompt =
       JSON.stringify(data) +
-      `[
-      "Cognizable Offenses",
-      "Non-Cognizable Offenses",
-      "Bailable Offenses",
-      "Non-Bailable Offenses",
-      "Compoundable Offenses",
-      "Non-Compoundable Offenses",
-      "Offenses against Women",
-      "Offenses against Children",
-      "Economic Offenses",
-      "Cyber Crimes",
-      "Drug Offenses",
-      "Environmental Offenses",
-      "Traffic Offenses",
-      "Property Offenses",
-      "Terrorism-related Offenses",
-      "White-collar Crimes",
-      "Corruption Offenses",
-      "Fraudulent Practices",
-      "Domestic Violence Offenses",
-      "Sexual Harassment Offenses",
-      "Human Trafficking Offenses",
-      "Intellectual Property Crimes",
-      "Hate Crimes",
-      "Juvenile Offenses",
-      "Organized Crime",
-      "Money Laundering Offenses",
-      "Forgery and Counterfeiting Offenses",
-      "Alcohol-related Offenses",
-      "Public Order Offenses",
-      "Violation of Intellectual Property Rights",
-      "Cyberbullying Offenses",
-      "Religious Offenses",
-      "Wildlife Crimes",
-      "Labour Law Violations",
-      "Immigration Offenses",
-    ]` +
+      `[ "Cognizable Offenses", "Non-Cognizable Offenses", "Bailable Offenses", "Non-Bailable Offenses", "Compoundable Offenses", "Non-Compoundable Offenses", "Offenses against Women", "Offenses against Children", "Economic Offenses", "Cyber Crimes", "Drug Offenses", "Environmental Offenses", "Traffic Offenses", "Property Offenses", "Terrorism-related Offenses", "White-collar Crimes", "Corruption Offenses", "Fraudulent Practices", "Domestic Violence Offenses", "Sexual Harassment Offenses", "Human Trafficking Offenses", "Intellectual Property Crimes", "Hate Crimes", "Juvenile Offenses", "Organized Crime", "Money Laundering Offenses", "Forgery and Counterfeiting Offenses", "Alcohol-related Offenses", "Public Order Offenses", "Violation of Intellectual Property Rights", "Cyberbullying Offenses", "Religious Offenses", "Wildlife Crimes", "Labour Law Violations", "Immigration Offenses", ]` +
       " " +
       "from above json identify and return the array of categories they are fitting refers the categories array (if not matches return 'Not Identified'";
 
-    // console.log(prompt);
     const result = await model.generateContent(prompt, { maxLength: 100 });
     const response = await result.response;
     const arrayString = response.text();
-    console.log(response.text());
+    logger.info(response.text());
 
     if (arrayString)
       return categories.filter((ele) => arrayString.includes(ele));
     return ""
   } catch (err) {
-    console.error("Error generating summary:", err);
+    logger.error("Error generating summary:", err);
     throw err;
   }
 };
@@ -101,7 +65,7 @@ exports.register = async (req, res) => {
         IncidentDetails,
       });
     } catch (summaryErr) {
-      console.error("Error generating summary:", summaryErr);
+      logger.error("Error generating summary:", summaryErr);
     }
 
     try {
@@ -112,15 +76,12 @@ exports.register = async (req, res) => {
         IncidentDetails,
       });
     } catch (categoriesErr) {
-      console.error("Error getting categories:", categoriesErr);
+      logger.error("Error getting categories:", categoriesErr);
     }
 
     const evidences = req.files
       ? Object.values(req.files).map((file) => file)
       : [];
-    // console.log(123);
-    // console.log(evidences);
-    // console.log(evidences);
 
     const createPersonArray = async (personArray) => {
       const personIds = [];
@@ -136,7 +97,7 @@ exports.register = async (req, res) => {
           Object.entries(personData).filter(([key, value]) => value)
         );
 
-        console.log(filteredPersonData);
+        logger.info(filteredPersonData);
         const newPerson = new personSchema(filteredPersonData);
         await newPerson.save();
         personIds.push(newPerson._id);
@@ -148,7 +109,7 @@ exports.register = async (req, res) => {
     const parsedAccusedArray = JSON.parse(AccusedArray);
     const parsedWitnessArray = JSON.parse(WitnessArray);
     let parsedIncidentDetails = JSON.parse(IncidentDetails);
-    console.log(parsedIncidentDetails);
+    logger.info(parsedIncidentDetails);
     parsedIncidentDetails = {
       ...parsedIncidentDetails,
       TimeDateofIncident: new Date(parsedIncidentDetails.TimeDateofIncident),
@@ -168,7 +129,7 @@ exports.register = async (req, res) => {
               if (error) {
                 reject(error);
               } else {
-                console.log(result);
+                logger.info(result);
                 resolve(result.secure_url);
               }
             }
@@ -177,7 +138,7 @@ exports.register = async (req, res) => {
       })
     );
 
-    console.log(uploadedUrls);
+    logger.info(uploadedUrls);
 
     let filedBy = null;
     if (userId) {
@@ -211,7 +172,7 @@ exports.register = async (req, res) => {
 
     // Store complaint on blockchain
     try {
-      console.log('Starting blockchain storage...');
+      logger.info('Starting blockchain storage...');
       const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
       const complaintData = {
         incidentDetails: parsedIncidentDetails,
@@ -226,9 +187,9 @@ exports.register = async (req, res) => {
         complaintData
       );
       
-      console.log('Blockchain storage successful:', blockchainResult);
+      logger.info('Blockchain storage successful:', blockchainResult);
     } catch (error) {
-      console.error('Blockchain storage failed:', error);
+      logger.error('Blockchain storage failed:', error);
       // Don't throw - continue with database-only storage if blockchain fails
     }
 
@@ -248,7 +209,7 @@ exports.register = async (req, res) => {
       complaintId: newComplaint.firId,
     });
   } catch (err) {
-    console.error("Error registering complaint:", err);
+    logger.error("Error registering complaint:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
