@@ -221,8 +221,7 @@ exports.register = async (req, res) => {
       await fileComplaintOnChain(
         firId,
         uploadedUrls,
-        complaintData,
-        process.env.ADMIN_ACCOUNT // Replace with actual user's ETH address in production
+        complaintData
       );
     } catch (error) {
       console.error('Blockchain storage failed:', error);

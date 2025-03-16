@@ -62,8 +62,7 @@ exports.handler = async (req, res) => {
       const { updateComplaintStatusOnChain } = require('../../utils/blockchainUtils');
       await updateComplaintStatusOnChain(
         complaintId,
-        reqComplaint.complaintStatus.status,
-        process.env.ADMIN_ACCOUNT // Replace with actual user's ETH address in production
+        reqComplaint.complaintStatus.status
       );
     } catch (error) {
       console.error('Blockchain status update failed:', error);
