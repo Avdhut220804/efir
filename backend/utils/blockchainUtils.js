@@ -3,12 +3,12 @@ const web3 = require('../config/web3');
 const pino = require('pino');
 const logger = pino({
   level: 'debug',
-  transport: {
-    target: 'pino-pretty',
+  transport: pino.transport({
+    target: require.resolve('pino-pretty'),
     options: {
       colorize: true
     }
-  }
+  })
 });
 
 const uploadToIPFS = async (data) => {

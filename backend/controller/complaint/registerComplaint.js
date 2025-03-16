@@ -8,12 +8,12 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEN_AI);
 const pino = require('pino');
 const logger = pino({
   level: 'debug',
-  transport: {
-    target: 'pino-pretty',
+  transport: pino.transport({
+    target: require.resolve('pino-pretty'),
     options: {
       colorize: true
     }
-  }
+  })
 });
 
 const generateSummary = async (data) => {
