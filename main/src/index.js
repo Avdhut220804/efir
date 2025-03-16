@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import {BrowserRouter} from "react-router-dom"
+import { Web3Provider } from './context/Web3Context';
 
 import 'typeface-roboto'; // Import Roboto
 import 'typeface-roboto-condensed'; // Import Roboto Condensed
@@ -19,6 +20,8 @@ import 'typeface-merriweather';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <App />
+    <Web3Provider>
+      <App />
+    </Web3Provider>
   </BrowserRouter>
 );
