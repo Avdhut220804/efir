@@ -196,6 +196,7 @@ exports.register = async (req, res) => {
       }
     }
 
+    // Create complaint in database
     const newComplaint = await Complaint.create({
       VictimIds: VictimIds.map((id) => new mongoose.Types.ObjectId(id)),
       AccusedIds: AccusedIds.map((id) => new mongoose.Types.ObjectId(id)),
@@ -207,6 +208,26 @@ exports.register = async (req, res) => {
       Summary,
       Categories,
     });
+
+    // Store complaint on blockchain
+    try {
+      const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
+      const complaintData = {
+        incidentDetails: parsedIncidentDetails,
+        summary: Summary,
+        categories: Categories
+      };
+      
+      await fileComplaintOnChain(
+        firId,
+        uploadedUrls,
+        complaintData,
+        process.env.ADMIN_ACCOUNT // Replace with actual user's ETH address in production
+      );
+    } catch (error) {
+      console.error('Blockchain storage failed:', error);
+      // Continue with database-only storage if blockchain fails
+    }
 
     if (userId) {
       await user.updateOne(
