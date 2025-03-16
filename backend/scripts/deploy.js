@@ -1,7 +1,11 @@
-
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
 const compiledContract = require('../contracts/build/ComplaintRegistry.json');
+require('dotenv').config();
+
+console.log('Deploying contract...');
+console.log('Mnemonic:', process.env.MNEMONIC);
+console.log('Alchemy URL:', process.env.ALCHEMY_URL);
 
 const provider = new HDWalletProvider(
     process.env.MNEMONIC,
@@ -30,4 +34,7 @@ const deploy = async () => {
     }
 };
 
-deploy();
+deploy().catch(error => {
+    console.error('Unhandled error:', error);
+    provider.engine.stop();
+});
