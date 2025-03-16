@@ -1,7 +1,15 @@
 const contract = require('../config/contract');
 const web3 = require('../config/web3');
 const pino = require('pino');
-const logger = pino({ level: 'info' });
+const logger = pino({
+  level: 'debug',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true
+    }
+  }
+});
 
 const uploadToIPFS = async (data) => {
   // For now returning a simple hash, in production integrate with IPFS

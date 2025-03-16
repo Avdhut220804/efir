@@ -6,7 +6,15 @@ const cloudinary = require("cloudinary").v2;
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEN_AI);
 const pino = require('pino');
-const logger = pino({ level: 'info' });
+const logger = pino({
+  level: 'debug',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true
+    }
+  }
+});
 
 const generateSummary = async (data) => {
   try {
