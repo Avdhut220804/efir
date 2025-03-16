@@ -1,0 +1,16 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "**EFIR** is a pioneering complaint management platform built on the MERN stack, enhanced with cutting-edge generative AI (GenAI). This project revolutionizes the legal process by significantly reducing system lag and streamlining complaint handling with advanced technologies. Designed with security at its core, EFIR offers a dual-portal system for both regular users and super users like judiciary and police, ensuring precise tracking and efficient processing of legal complaints.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "web3": "^4.16.0"
+  }
+}
