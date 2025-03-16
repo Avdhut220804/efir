@@ -211,21 +211,25 @@ exports.register = async (req, res) => {
 
     // Store complaint on blockchain
     try {
+      console.log('Starting blockchain storage...');
       const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
       const complaintData = {
         incidentDetails: parsedIncidentDetails,
         summary: Summary,
-        categories: Categories
+        categories: Categories,
+        timestamp: new Date().toISOString()
       };
       
-      await fileComplaintOnChain(
+      const blockchainResult = await fileComplaintOnChain(
         firId,
         uploadedUrls,
         complaintData
       );
+      
+      console.log('Blockchain storage successful:', blockchainResult);
     } catch (error) {
       console.error('Blockchain storage failed:', error);
-      // Continue with database-only storage if blockchain fails
+      // Don't throw - continue with database-only storage if blockchain fails
     }
 
     if (userId) {

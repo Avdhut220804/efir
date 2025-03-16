@@ -9,11 +9,21 @@ const uploadToIPFS = async (data) => {
 
 const fileComplaintOnChain = async (firId, evidenceUrls, complaintData) => {
   try {
-    console.log('Starting blockchain complaint filing...');
+    console.log('Starting blockchain complaint filing...', { firId, evidenceUrls, complaintData });
+    
+    // Debug contract
+    console.log('Contract address:', contract.options.address);
+    
     const evidenceHash = await uploadToIPFS(evidenceUrls);
     const metadataHash = await uploadToIPFS(complaintData);
+    console.log('Generated hashes:', { evidenceHash, metadataHash });
     
-    const accounts = await web3.eth.getAccounts();
+    // Get accounts with error handling
+    const accounts = await web3.eth.getAccounts().catch(err => {
+      console.error('Failed to get accounts:', err);
+      throw new Error('Failed to get Ethereum accounts');
+    });
+    
     if (!accounts || accounts.length === 0) {
       throw new Error('No Ethereum accounts available');
     }
@@ -21,11 +31,22 @@ const fileComplaintOnChain = async (firId, evidenceUrls, complaintData) => {
     console.log('Using account:', accounts[0]);
     console.log('Filing complaint with FIR ID:', firId);
     
+    // Estimate gas first
+    const gasEstimate = await contract.methods
+      .fileComplaint(firId.toString(), evidenceHash, metadataHash)
+      .estimateGas({ from: accounts[0] })
+      .catch(err => {
+        console.error('Gas estimation failed:', err);
+        return 20000000; // Fallback gas limit
+      });
+    
+    console.log('Estimated gas:', gasEstimate);
+    
     const result = await contract.methods
       .fileComplaint(firId.toString(), evidenceHash, metadataHash)
       .send({ 
         from: accounts[0], 
-        gas: "20000000",
+        gas: gasEstimate,
         gasPrice: await web3.eth.getGasPrice()
       });
       
