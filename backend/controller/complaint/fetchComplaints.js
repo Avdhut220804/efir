@@ -124,20 +124,48 @@ exports.fetchComplaintSuper = async (req, res) => {
 
     console.log(filter);
 
-    const complaints = await Complaint.find(filter)
-      .sort({ LastEdited: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate({
-        path: "VictimIds AccusedIds WitnessIds filedBy complaintStatus.user",
-      });
+    // Database fetch (commented out)
+    // const complaints = await Complaint.find(filter)
+    //   .sort({ LastEdited: -1 })
+    //   .skip(skip)
+    //   .limit(limit)
+    //   .populate({
+    //     path: "VictimIds AccusedIds WitnessIds filedBy complaintStatus.user",
+    //   });
+    // const totalComplaints = await Complaint.countDocuments(filter);
 
-    const totalComplaints = await Complaint.countDocuments(filter);
+    // Blockchain fetch
+    const contract = require('../../config/contract');
+    const complaintIds = await contract.methods.complaintIds().call();
+    const blockchainComplaints = [];
+    
+    // Get complaints from the range based on pagination
+    const start = (page - 1) * limit;
+    const end = Math.min(start + limit, complaintIds.length);
+    
+    for(let i = start; i < end; i++) {
+      const firId = complaintIds[i];
+      const complaint = await contract.methods.getComplaint(firId).call();
+      
+      // Parse IPFS hashes to get actual data
+      const metadataResponse = await fetch(`https://ipfs.io/ipfs/${complaint.metadataHash}`);
+      const metadata = await metadataResponse.json();
+      
+      blockchainComplaints.push({
+        firId: firId,
+        evidenceHash: complaint.evidenceHash,
+        metadataHash: complaint.metadataHash,
+        status: complaint.status,
+        reporter: complaint.reporter,
+        timestamp: complaint.timestamp,
+        ...metadata // Spread the metadata which contains IncidentDetail, Summary, etc.
+      });
+    }
 
     res.status(200).json({
-      complaints,
+      complaints: blockchainComplaints,
       currentPage: page,
-      totalPages: Math.ceil(totalComplaints / limit),
+      totalPages: Math.ceil(complaintIds.length / limit),
     });
   } catch (err) {
     console.error("Error fetching complaint:", err);
