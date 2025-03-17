@@ -8,6 +8,7 @@ import { IoMdRemoveCircleOutline } from "react-icons/io";
 import { Link, NavLink } from "react-router-dom"; // Import Link from react-router-dom
 import { toast } from "react-hot-toast";
 import FirId from "./FirId";
+import API_BASE_URL from '../../config/api'; // Added import statement
 
 const ComplaintForm = ({ currentUser }) => {
   const [townTree, setTownTree] = useState({});
@@ -32,7 +33,7 @@ const ComplaintForm = ({ currentUser }) => {
     const fetch = async () => {
       try {
         const res = await axios.post(
-          "https://efir-git-main-shubhamshinde6762s-projects.vercel.app/api/v1/fetchTownTree",
+          `${API_BASE_URL}/api/v1/fetchTownTree`, // Updated API URL
           {}
         );
         console.log(res);
@@ -71,7 +72,7 @@ const ComplaintForm = ({ currentUser }) => {
 
       const response = await toast.promise(
         axios.post(
-          "https://efir-ecru.vercel.app/api/v1/complaints/register-complaint",
+          `${API_BASE_URL}/api/v1/complaints/register-complaint`, // Updated API URL
           formData,
           {
             headers: {
@@ -143,16 +144,16 @@ const ComplaintForm = ({ currentUser }) => {
   };
   const validateForm = () => {
     const { TimeDateofIncident, IncidentDescription } = complaintDetails.IncidentDetail;
-    
+
     if (!TimeDateofIncident || !IncidentDescription) {
       // console.log("Validation failed: Incident date and description are required fields.");
       toast.error("Date of incident and description are required fields.");
       return false;
     }
-    
+
     return true;
   };
-  
+
   const onSubmitHandler = () => {
     if (validateForm()) {
       registerHandler();
@@ -538,7 +539,7 @@ const ComplaintForm = ({ currentUser }) => {
         <button
           onClick={onSubmitHandler}
           className="font-bold font-poppins py-1 px-2 text-sm md:text-base 
-          
+
           bg-green-500 hover:bg-green-700 text-white rounded-lg hover:scale-105 transition-all duration-500"
         >
           Register Complaint
