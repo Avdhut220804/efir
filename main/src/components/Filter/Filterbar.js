@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { IoCloseOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from '../../config/api';
 
 function Filterbar({
   currentUser,
