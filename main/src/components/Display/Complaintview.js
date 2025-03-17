@@ -3,6 +3,10 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import Personview from "./Personview";
 import axios from "axios";
 
+// API configuration
+const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://efir-ecru.vercel.app';
+
+
 const Complaintview = ({
   complaintDetails,
   setComplaintDetails,
@@ -41,7 +45,7 @@ const Complaintview = ({
     } else {
       console.log(123);
       const response = await axios.post(
-        `https://efir-ecru.vercel.app/api/v1/complaints/handleComlplaints/superUser?state=${e.target.name}`,
+        `${API_BASE_URL}/api/v1/complaints/handleComlplaints/superUser?state=${e.target.name}`,
         {
           userId: currentUser._id,
           remark,
