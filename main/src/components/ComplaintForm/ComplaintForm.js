@@ -5,10 +5,12 @@ import AddPeople from "./AddPeople";
 import { LiaUserEditSolid } from "react-icons/lia";
 import { AiOutlineUserDelete } from "react-icons/ai";
 import { IoMdRemoveCircleOutline } from "react-icons/io";
-import { Link, NavLink } from "react-router-dom"; // Import Link from react-router-dom
+import { NavLink } from "react-router-dom"; // Import Link from react-router-dom
 import { toast } from "react-hot-toast";
 import FirId from "./FirId";
 import API_BASE_URL from '../../config/api'; // Added import statement
+import { uploadToIPFS } from "../../utils/ipfsUtils"; // Added import statement
+import { fileComplaintOnChain } from "../../utils/blockchainUtils"; // Added import statement
 
 const ComplaintForm = ({ currentUser }) => {
   const [townTree, setTownTree] = useState({});
@@ -91,6 +93,7 @@ const ComplaintForm = ({ currentUser }) => {
               const { blockchainData } = data.data;
               const evidenceHash = await uploadToIPFS(blockchainData.evidenceUrls);
               const metadataHash = await uploadToIPFS(blockchainData.complaintData);
+              console.log("IPFS storage successful:", evidenceHash, metadataHash);
               
               const result = await fileComplaintOnChain(
                 blockchainData.firId,
@@ -200,7 +203,7 @@ const ComplaintForm = ({ currentUser }) => {
           <div className="absolute font-bold font-poppins  bg-white  px-2 text-xl -top-3 left-2">
             Incident Details
           </div>
-          <lable className="mx-2  ">
+          <label className="mx-2  ">
             <span className="mr-4 text-[1rem] font-bold">
               Date Of Incident:<span className="text-red-500">*</span>
             </span>
@@ -211,12 +214,12 @@ const ComplaintForm = ({ currentUser }) => {
               value={complaintDetails.IncidentDetail.TimeDateofIncident}
               className="shadow rounded-lg px-3 py-1 w-[8.7rem]"
             />
-          </lable>
+          </label>
           <div className="relative p-3 border-slate-200 border-2 rounded-xl">
             <div className="absolute font-poppins font-bold bg-white px-2 -top-3 left-2">
               Place Of Incident
             </div>
-            <lable className="mx-2 py-2 flex flex-col space-y-3">
+            <label className="mx-2 py-2 flex flex-col space-y-3">
               <textarea
                 placeholder="Landmark..."
                 id="LandMark"
@@ -260,9 +263,9 @@ const ComplaintForm = ({ currentUser }) => {
                   </select>
                 </div>
               </div>
-            </lable>
+            </label>
           </div>
-          <lable className="mx-2 flex flex-col space-y-3">
+          <label className="mx-2 flex flex-col space-y-3">
             <div className="mr-4 text-[1rem] font-bold">
               Incident Description:
               <span className="text-red-500">*</span>
@@ -274,7 +277,7 @@ const ComplaintForm = ({ currentUser }) => {
               placeholder="Incident Description..."
               className=" p-3 rounded-xl resize-none shadow w-full"
             ></textarea>
-          </lable>
+          </label>
         </div>
 
         <div className=" border-gray-300  space-y-3 p-4  relative border-4 w-full flex flex-col  rounded-2xl">
@@ -325,14 +328,11 @@ const ComplaintForm = ({ currentUser }) => {
                       />
                       <AiOutlineUserDelete
                         onClick={() =>
-                          setComplaintDetails((pre) => {
-                            return {
-                              ...pre,
-                              ["VictimArray"]: pre.VictimArray.filter(
-                                (obj) => obj !== ele
-                              ),
-                            };
-                          })
+                          setComplaintDetails((prev) => ({
+  ...prev,
+  VictimArray: prev.VictimArray.filter((obj) => obj.name !== ele.name),
+}))
+
                         }
                         className="rounded-full bg-red-500 cursor-pointer hover:scale-105 transition-all duration-300 hover:bg-red-700 p-1"
                       />
@@ -352,7 +352,7 @@ const ComplaintForm = ({ currentUser }) => {
             className="flex gap-1 font-lato select-none hover:scale-105 transition-all duration-300 cursor-pointer text-bold w-fit px-2 py-1 rounded-md  justify-center items-center"
           >
             <IoMdAdd className="text-2xl bg-green-500 rounded-full text-white p-1" />
-            Accuss
+            Accussed
           </div>
 
           {complaintDetails.AccusedArray.length > 0 && (
