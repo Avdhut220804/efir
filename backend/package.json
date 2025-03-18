@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.5.0",
     "@truffle/hdwallet-provider": "^2.1.15",
+    "axios": "^1.8.3",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.1.0",
     "cors": "^2.8.5",
@@ -22,6 +23,7 @@
     "fs-extra": "^11.3.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
+    "kubo-rpc-client": "^5.1.0",
     "mongoose": "^8.1.2",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.10",

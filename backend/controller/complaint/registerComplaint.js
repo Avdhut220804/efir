@@ -4,13 +4,19 @@ const personSchema = require("../../model/person");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const axios = require("axios");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEN_AI);
+const web3 = require('../../config/web3');
+const contract = require('../../config/contract');
 const pino = require('pino');
 const logger = pino(pino.transport({
   target: 'pino-pretty',
   options: { colorize: true }
 }));
 
+
+const PINATA_API_KEY = process.env.PINATA_API_KEY;
+const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
 
 const generateSummary = async (data) => {
@@ -178,7 +184,7 @@ exports.register = async (req, res) => {
     // Store complaint on blockchain
     try {
       logger.info('Starting blockchain storage...');
-      const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
+      //const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
       const complaintData = {
         incidentDetails: parsedIncidentDetails,
         summary: Summary,
@@ -186,11 +192,58 @@ exports.register = async (req, res) => {
         timestamp: new Date().toISOString()
       };
       
-      const blockchainResult = await fileComplaintOnChain(
-        firId,
-        uploadedUrls,
-        complaintData
-      );
+      try {
+        let evidenceUrls = uploadedUrls;
+        logger.info('Starting blockchain complaint filing...');
+        logger.info('Reached here');
+        // Debug contract
+        //logger.info('Contract address:', contract.options.address);
+        
+        // const evidenceHash = await uploadToIPFS(evidenceUrls);
+        // const metadataHash = await uploadToIPFS(complaintData);
+        const evidenceHash = 'QmPmY8HfFQ58FmTb3LcNSELvJZePk8zgPfrhxq444fnexi'
+        const metadataHash = 'QmbErsFeMmaJdKJ9nfbNDJBtgTstH9JpWAb3auXWncDLGM';
+        logger.info('ipfs not failed');
+        logger.info('Generated hashes:', { evidenceHash, metadataHash });
+        
+        // Get accounts with error handling
+        const accounts = await web3.eth.getAccounts().catch(err => {
+          logger.error('Failed to get accounts:');
+          throw new Error('Failed to get Ethereum accounts');
+        });
+        
+        if (!accounts || accounts.length === 0) {
+          throw new Error('No Ethereum accounts available');
+        }
+        
+        logger.info('Using account:', accounts[0]);
+        logger.info('Filing complaint with FIR ID:', firId);
+        
+        // Estimate gas first
+        const gasEstimate = await contract.methods
+          .fileComplaint(firId.toString(), evidenceHash, metadataHash)
+          .estimateGas({ from: accounts[0] })
+          .catch(err => {
+            logger.error('Gas estimation failed:', err);
+            return 20000000; // Fallback gas limit
+          });
+        
+        logger.info('Estimated gas:', gasEstimate);
+        
+        const result = await contract.methods
+          .fileComplaint(firId.toString(), evidenceHash, metadataHash)
+          .send({ 
+            from: accounts[0], 
+            gas: gasEstimate,
+            gasPrice: await web3.eth.getGasPrice()
+          });
+          
+        logger.info('Complaint filed on blockchain:', result.transactionHash);
+        return result;
+      } catch (error) {
+        logger.error('Blockchain error details:', error);
+        throw error;
+      }
       
       logger.info('Blockchain storage successful:', blockchainResult);
     } catch (error) {
@@ -218,6 +271,35 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+const uploadToIPFS = async (data) => {
+  try {
+    const jsonData = JSON.stringify(data);
+    
+    const response = await axios.post(
+      "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+      {
+        pinataContent: jsonData,
+        pinataMetadata: { name: "ComplaintData" },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          pinata_api_key: PINATA_API_KEY,
+          pinata_secret_api_key: PINATA_SECRET_API_KEY,
+        },
+      }
+    );
+
+    const ipfsHash = response.data.IpfsHash;
+    logger.info(`Pinata IPFS Hash: ${ipfsHash}`);
+    return ipfsHash; // Return IPFS CID
+  } catch (err) {
+    logger.error("Error uploading to Pinata IPFS:", err);
+    throw err;
+  }
+};
+
 
 const categories = [
   "Cognizable Offenses",
