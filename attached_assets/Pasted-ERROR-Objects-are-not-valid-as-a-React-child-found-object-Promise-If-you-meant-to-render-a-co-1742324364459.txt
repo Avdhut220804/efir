@@ -1,0 +1,62 @@
+ERROR
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (http://localhost:3000/static/js/bundle.js:31925:13)
+    at reconcileChildFibers (http://localhost:3000/static/js/bundle.js:32701:11)
+    at reconcileChildren (http://localhost:3000/static/js/bundle.js:35632:32)
+    at updateHostComponent (http://localhost:3000/static/js/bundle.js:36269:7)
+    at beginWork (http://localhost:3000/static/js/bundle.js:37714:18)
+    at HTMLUnknownElement.callCallback (http://localhost:3000/static/js/bundle.js:22706:18)
+    at Object.invokeGuardedCallbackDev (http://localhost:3000/static/js/bundle.js:22750:20)
+    at invokeGuardedCallback (http://localhost:3000/static/js/bundle.js:22807:35)
+    at beginWork$1 (http://localhost:3000/static/js/bundle.js:42671:11)
+    at performUnitOfWork (http://localhost:3000/static/js/bundle.js:41919:16)
+ERROR
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (http://localhost:3000/static/js/bundle.js:31925:13)
+    at reconcileChildFibers (http://localhost:3000/static/js/bundle.js:32701:11)
+    at reconcileChildren (http://localhost:3000/static/js/bundle.js:35632:32)
+    at updateHostComponent (http://localhost:3000/static/js/bundle.js:36269:7)
+    at beginWork (http://localhost:3000/static/js/bundle.js:37714:18)
+    at HTMLUnknownElement.callCallback (http://localhost:3000/static/js/bundle.js:22706:18)
+    at Object.invokeGuardedCallbackDev (http://localhost:3000/static/js/bundle.js:22750:20)
+    at invokeGuardedCallback (http://localhost:3000/static/js/bundle.js:22807:35)
+    at beginWork$1 (http://localhost:3000/static/js/bundle.js:42671:11)
+    at performUnitOfWork (http://localhost:3000/static/js/bundle.js:41919:16)
+ERROR
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (http://localhost:3000/static/js/bundle.js:31925:13)
+    at reconcileChildFibers (http://localhost:3000/static/js/bundle.js:32701:11)
+    at reconcileChildren (http://localhost:3000/static/js/bundle.js:35632:32)
+    at updateHostComponent (http://localhost:3000/static/js/bundle.js:36269:7)
+    at beginWork (http://localhost:3000/static/js/bundle.js:37714:18)
+    at beginWork$1 (http://localhost:3000/static/js/bundle.js:42649:18)
+    at performUnitOfWork (http://localhost:3000/static/js/bundle.js:41919:16)
+    at workLoopSync (http://localhost:3000/static/js/bundle.js:41842:9)
+    at renderRootSync (http://localhost:3000/static/js/bundle.js:41815:11)
+    at recoverFromConcurrentError (http://localhost:3000/static/js/bundle.js:41307:24)
+ERROR
+destroy is not a function
+TypeError: destroy is not a function
+    at safelyCallDestroy (http://localhost:3000/static/js/bundle.js:38823:9)
+    at commitHookEffectListUnmount (http://localhost:3000/static/js/bundle.js:38961:15)
+    at commitPassiveUnmountInsideDeletedTreeOnFiber (http://localhost:3000/static/js/bundle.js:40642:15)
+    at commitPassiveUnmountEffectsInsideOfDeletedTree_begin (http://localhost:3000/static/js/bundle.js:40598:9)
+    at commitPassiveUnmountEffects_begin (http://localhost:3000/static/js/bundle.js:40520:15)
+    at commitPassiveUnmountEffects (http://localhost:3000/static/js/bundle.js:40508:7)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:42329:7)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:42283:18)
+    at http://localhost:3000/static/js/bundle.js:42098:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:56753:38)
+ERROR
+destroy is not a function
+TypeError: destroy is not a function
+    at safelyCallDestroy (http://localhost:3000/static/js/bundle.js:38823:9)
+    at commitHookEffectListUnmount (http://localhost:3000/static/js/bundle.js:38961:15)
+    at commitPassiveUnmountInsideDeletedTreeOnFiber (http://localhost:3000/static/js/bundle.js:40642:15)
+    at commitPassiveUnmountEffectsInsideOfDeletedTree_begin (http://localhost:3000/static/js/bundle.js:40598:9)
+    at commitPassiveUnmountEffects_begin (http://localhost:3000/static/js/bundle.js:40520:15)
+    at commitPassiveUnmountEffects (http://localhost:3000/static/js/bundle.js:40508:7)
+    at flushPassiveEffectsImpl (http://localhost:3000/static/js/bundle.js:42329:7)
+    at flushPassiveEffects (http://localhost:3000/static/js/bundle.js:42283:18)
+    at http://localhost:3000/static/js/bundle.js:42098:13
+    at workLoop (http://localhost:3000/static/js/bundle.js:56753:38)
