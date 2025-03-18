@@ -181,75 +181,17 @@ exports.register = async (req, res) => {
       Categories,
     });
 
-    // Store complaint on blockchain
-    try {
-      logger.info('Starting blockchain storage...');
-      //const { fileComplaintOnChain } = require('../../utils/blockchainUtils');
-      const complaintData = {
+    // Return data needed for blockchain storage
+    const blockchainData = {
+      firId: firId.toString(),
+      evidenceUrls: uploadedUrls,
+      complaintData: {
         incidentDetails: parsedIncidentDetails,
         summary: Summary,
         categories: Categories,
         timestamp: new Date().toISOString()
-      };
-      
-      try {
-        let evidenceUrls = uploadedUrls;
-        logger.info('Starting blockchain complaint filing...');
-        logger.info('Reached here');
-        // Debug contract
-        //logger.info('Contract address:', contract.options.address);
-        
-        // const evidenceHash = await uploadToIPFS(evidenceUrls);
-        // const metadataHash = await uploadToIPFS(complaintData);
-        const evidenceHash = 'QmPmY8HfFQ58FmTb3LcNSELvJZePk8zgPfrhxq444fnexi'
-        const metadataHash = 'QmbErsFeMmaJdKJ9nfbNDJBtgTstH9JpWAb3auXWncDLGM';
-        logger.info('ipfs not failed');
-        logger.info('Generated hashes:', { evidenceHash, metadataHash });
-        
-        // Get accounts with error handling
-        const accounts = await web3.eth.getAccounts().catch(err => {
-          logger.error('Failed to get accounts:');
-          throw new Error('Failed to get Ethereum accounts');
-        });
-        
-        if (!accounts || accounts.length === 0) {
-          throw new Error('No Ethereum accounts available');
-        }
-        
-        logger.info('Using account:', accounts[0]);
-        logger.info('Filing complaint with FIR ID:', firId);
-        
-        // Estimate gas first
-        const gasEstimate = await contract.methods
-          .fileComplaint(firId.toString(), evidenceHash, metadataHash)
-          .estimateGas({ from: accounts[0] })
-          .catch(err => {
-            logger.error('Gas estimation failed:', err);
-            return 20000000; // Fallback gas limit
-          });
-        
-        logger.info('Estimated gas:', gasEstimate);
-        
-        const result = await contract.methods
-          .fileComplaint(firId.toString(), evidenceHash, metadataHash)
-          .send({ 
-            from: accounts[0], 
-            gas: gasEstimate,
-            gasPrice: await web3.eth.getGasPrice()
-          });
-          
-        logger.info('Complaint filed on blockchain:', result.transactionHash);
-        return result;
-      } catch (error) {
-        logger.error('Blockchain error details:', error);
-        throw error;
       }
-      
-      logger.info('Blockchain storage successful:', blockchainResult);
-    } catch (error) {
-      logger.error('Blockchain storage failed:', error);
-      // Don't throw - continue with database-only storage if blockchain fails
-    }
+    };
 
     if (userId) {
       await user.updateOne(
@@ -265,6 +207,7 @@ exports.register = async (req, res) => {
     res.status(200).json({
       message: "Complaint Filed Successfully",
       complaintId: newComplaint.firId,
+      blockchainData
     });
   } catch (err) {
     logger.error("Error registering complaint:", err);
