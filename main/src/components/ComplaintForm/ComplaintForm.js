@@ -85,29 +85,27 @@ const ComplaintForm = ({ currentUser }) => {
         ),
         {
           loading: "Filing FIR...",
-          success: async (data) => {
+          success: (data) => {
             console.log("FIR filed successfully in backend:", data);
-            
+            setDisplayFirId(data.data.complaintId);
+
             // Now store on blockchain
-            try {
-              const { blockchainData } = data.data;
-              const evidenceHash = await uploadToIPFS(blockchainData.evidenceUrls);
-              const metadataHash = await uploadToIPFS(blockchainData.complaintData);
-              console.log("IPFS storage successful:", evidenceHash, metadataHash);
-              
-              const result = await fileComplaintOnChain(
-                blockchainData.firId,
-                evidenceHash,
-                metadataHash
-              );
-              
-              console.log("Blockchain storage successful:", result);
-              setDisplayFirId(data.data.complaintId);
-              return "FIR filed successfully";
-            } catch (error) {
-              console.error("Blockchain storage failed:", error);
-              return "FIR filed but blockchain storage failed";
-            }
+            const { blockchainData } = data.data;
+            uploadToIPFS(blockchainData.evidenceUrls)
+              .then(evidenceHash => uploadToIPFS(blockchainData.complaintData)
+                .then(metadataHash => {
+                  fileComplaintOnChain(
+                    blockchainData.firId,
+                    evidenceHash,
+                    metadataHash
+                  ).then(result => {
+                    console.log("Blockchain storage successful:", result);
+                  }).catch(error => {
+                    console.error("Blockchain storage failed:", error);
+                  });
+                }));
+
+            return "FIR filed successfully";
           },
           error: () => {
             console.error("Error filing FIR");
