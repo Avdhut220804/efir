@@ -53,3 +53,32 @@ export const getComplaintFromChain = async (firId) => {
     throw error;
   }
 };
+
+export const updateComplaintStatusOnChain = async (firId, status) => {
+  try {
+    console.log('Starting blockchain status update...');
+    const accounts = await web3.eth.getAccounts();
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No Ethereum accounts available');
+    }
+    
+    console.log('Using account:', accounts[0]);
+    const gasEstimate = await contract.methods
+      .updateStatus(firId.toString(), status)
+      .estimateGas({ from: accounts[0] });
+      
+    const result = await contract.methods
+      .updateStatus(firId.toString(), status)
+      .send({ 
+        from: accounts[0], 
+        gas: gasEstimate,
+        gasPrice: await web3.eth.getGasPrice()
+      });
+      
+    console.log('Status updated on blockchain:', result.transactionHash);
+    return result;
+  } catch (error) {
+    console.error('Blockchain error details:', error);
+    throw error;
+  }
+};
