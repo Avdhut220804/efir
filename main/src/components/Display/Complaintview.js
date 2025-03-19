@@ -31,12 +31,9 @@ const Complaintview = ({
     if (complaintDetails?.firId) {
       const fetchBlockchainData = async () => {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/api/v1/complaints/blockchain/${complaintDetails.firId}`
-          );
-          if (response.data?.complaint) {
-            setBlockchainData(response.data.complaint);
-          }
+          const { fetchComplaintFromChain } = await import("../../utils/blockchainUtils");
+          const blockchainComplaint = await fetchComplaintFromChain(complaintDetails.firId);
+          setBlockchainData(blockchainComplaint);
         } catch (error) {
           console.error("Failed to fetch blockchain data:", error);
           toast.warning("Unable to fetch blockchain verification data");
@@ -73,6 +70,17 @@ const Complaintview = ({
     }
 
     try {
+      // First update blockchain
+      const newStatus = statusValue === "true" ? "Completed" : "Park";
+      try {
+        await updateComplaintStatusOnChain(complaintDetails.firId, newStatus);
+      } catch (error) {
+        console.error("Blockchain update failed:", error);
+        toast.error("Failed to update on blockchain");
+        return;
+      }
+
+      // Then update database
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/complaints/handleComlplaints/superUser?state=${statusValue}`,
         {
@@ -83,17 +91,11 @@ const Complaintview = ({
       );
 
       if (response.data) {
-        // Update status on blockchain
-        try {
-          await updateComplaintStatusOnChain(
-            complaintDetails.firId,
-            statusValue === "true" ? "Completed" : "Park"
-          );
-          toast.success("Status updated successfully");
-        } catch (error) {
-          console.error("Blockchain update failed:", error);
-          toast.warning("Database updated but blockchain update failed");
-        }
+        toast.success("Status updated successfully");
+        // Refresh blockchain data
+        const { fetchComplaintFromChain } = await import("../../utils/blockchainUtils");
+        const updatedBlockchainData = await fetchComplaintFromChain(complaintDetails.firId);
+        setBlockchainData(updatedBlockchainData);
 
         setFilters((pre) => ({
           ...pre,
