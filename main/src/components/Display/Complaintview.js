@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Personview from "./Personview";
 import axios from "axios";
-import { toast } from 'react-toastify'; // Assuming react-toastify is used for error messages
+import { toast } from 'react-toastify';
+import { updateComplaintStatusOnChain } from "../../utils/blockchainUtils";
 
 // API configuration
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://efir-ecru.vercel.app';
@@ -40,31 +41,47 @@ const Complaintview = ({
   };
 
   const statusHandler = async (e) => {
-    if (remark || e.target.name === "true") {
-      try {
-        const response = await axios.patch(
-          `${API_BASE_URL}/api/v1/complaints/update-complaint-status/${complaintDetails._id}`,
-          {
-            status: e.target.name === "true" ? "Verified" : "Rejected",
-            remark: remark,
-          }
-        );
+    const statusValue = e.target.name;
+    if (statusValue !== "true" && statusValue !== "false") {
+      console.error("Invalid status value");
+      return;
+    }
 
-        if (response) {
-          // Update status on blockchain - Assuming updateComplaintStatusOnChain is imported
+    if (!remark && statusValue === "false") {
+      toast.error("Please provide a remark to park the complaint");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/complaints/handleComlplaints/superUser?state=${statusValue}`,
+        {
+          userId: currentUser._id,
+          remark: remark,
+          complaintId: complaintDetails._id,
+        }
+      );
+
+      if (response.data) {
+        // Update status on blockchain
+        try {
           await updateComplaintStatusOnChain(
             complaintDetails.firId,
-            e.target.name === "true" ? "Verified" : "Rejected"
+            statusValue === "true" ? "Completed" : "Park"
           );
-
-          setFilters((pre) => ({
-            ...pre,
-          }));
+          toast.success("Status updated successfully");
+        } catch (error) {
+          console.error("Blockchain update failed:", error);
+          toast.warning("Database updated but blockchain update failed");
         }
-      } catch (error) {
-        console.error("Error updating status:", error);
-        toast.error("Failed to update status on blockchain");
+
+        setFilters((pre) => ({
+          ...pre,
+        }));
       }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
     }
   };
   return (
