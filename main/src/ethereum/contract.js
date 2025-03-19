@@ -1,22 +1,23 @@
+import web3 from "./web3";
+import ComplaintRegistry from "../ethereum/contracts/build/ComplaintRegistry.json";
 
-const web3 = require('./web3');
-const ComplaintRegistry = require('../contracts/build/ComplaintRegistry.json');
+const contractAddress = "0x351Cc89a15DeFAb05e91e5558a1788D14076451a";
 
-const contractAddress = process.env.CONTRACT_ADDRESS;
+// Debugging Logs
+console.log("✅ Web3 instance in contract.js:", web3);
+console.log("✅ Web3.eth:", web3?.eth);
+console.log("✅ ComplaintRegistry ABI:", ComplaintRegistry?.abi);
 
-if (!contractAddress) {
-  throw new Error('Contract address not found in environment variables');
+if (!web3 || !web3.eth) {
+  throw new Error("❌ Web3 is not initialized properly.");
 }
 
-const instance = new web3.eth.Contract(
-  ComplaintRegistry.abi,
-  contractAddress
-);
-
-if (!instance) {
-  throw new Error('Failed to initialize contract instance');
+if (!ComplaintRegistry || !ComplaintRegistry.abi) {
+  throw new Error("❌ ComplaintRegistry ABI is missing or incorrect.");
 }
 
-console.log('Contract initialized at:', contractAddress);
+const instance = new web3.eth.Contract(ComplaintRegistry.abi, contractAddress);
 
-module.exports = instance;
+console.log("✅ Contract initialized at:", contractAddress);
+
+export default instance;
