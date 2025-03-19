@@ -86,3 +86,29 @@ export const updateComplaintStatusOnChain = async (firId, status) => {
     throw error;
   }
 };
+
+export const fetchComplaintFromChain = async (firId) => {
+  try {
+    const complaint = await contract.methods.getComplaint(firId).call();
+    
+    try {
+      const metadataResponse = await fetch(`https://ipfs.io/ipfs/${complaint.metadataHash}`);
+      const metadata = await metadataResponse.json();
+      
+      return {
+        firId: firId,
+        evidenceHash: complaint.evidenceHash,
+        metadataHash: complaint.metadataHash,
+        status: complaint.status,
+        reporter: complaint.reporter,
+        timestamp: complaint.timestamp,
+        ...metadata
+      };
+    } catch (error) {
+      return complaint;
+    }
+  } catch (error) {
+    console.error('Error fetching blockchain complaint:', error);
+    throw error;
+  }
+};
