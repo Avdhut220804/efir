@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Personview from "./Personview";
 import axios from "axios";
+import { toast } from 'react-toastify'; // Assuming react-toastify is used for error messages
 
 // API configuration
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://efir-ecru.vercel.app';
@@ -39,30 +40,31 @@ const Complaintview = ({
   };
 
   const statusHandler = async (e) => {
-    const statusValue = e.target.name;
-    if (statusValue != "true" && statusValue != "false") {
-      console.log("Error");
-    } else {
-      console.log(123);
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/complaints/handleComlplaints/superUser?state=${e.target.name}`,
-        {
-          userId: currentUser._id,
-          remark,
-          complaintId: complaintDetails._id,
+    if (remark || e.target.name === "true") {
+      try {
+        const response = await axios.patch(
+          `${API_BASE_URL}/api/v1/complaints/update-complaint-status/${complaintDetails._id}`,
+          {
+            status: e.target.name === "true" ? "Verified" : "Rejected",
+            remark: remark,
+          }
+        );
+
+        if (response) {
+          // Update status on blockchain - Assuming updateComplaintStatusOnChain is imported
+          await updateComplaintStatusOnChain(
+            complaintDetails.firId,
+            e.target.name === "true" ? "Verified" : "Rejected"
+          );
+
+          setFilters((pre) => ({
+            ...pre,
+          }));
         }
-      );
-
-      console.log(response);
-
-      if (response) {
-        setFilters((pre) => ({
-          ...pre,
-        }));
-        // setComplaintDetails(response.data.updatedComplaint);
+      } catch (error) {
+        console.error("Error updating status:", error);
+        toast.error("Failed to update status on blockchain");
       }
-      // setStatus(statusValue);
-      // console.log(status);
     }
   };
   return (
