@@ -1,12 +1,14 @@
-import axios from 'axios';
+const axios = require('axios');
 
-const PINATA_API_KEY = process.env.PINATA_API_KEY;
-const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
+const PINATA_API_KEY = "4911ccd3d59ae087ce82";
+const PINATA_SECRET_API_KEY = "529526f6455caa78f6b71385004e959cf5efe8f5b403c8dcf43a7e68be5380bd";
 
-export const uploadToIPFS = async (data) => {
+// console.log('Pinata API Key:', PINATA_API_KEY);
+
+const uploadToIPFS = async (data) => {
   try {
     const jsonData = JSON.stringify(data);
-    
+
     const response = await axios.post(
       "https://api.pinata.cloud/pinning/pinJSONToIPFS",
       {
@@ -30,3 +32,5 @@ export const uploadToIPFS = async (data) => {
     throw err;
   }
 };
+
+module.exports = { uploadToIPFS };  // ✅ Use module.exports instead of export
