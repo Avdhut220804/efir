@@ -70,17 +70,7 @@ const Complaintview = ({
     }
 
     try {
-      // First update blockchain
-      const newStatus = statusValue === "true" ? "Completed" : "Park";
-      try {
-        await updateComplaintStatusOnChain(complaintDetails.firId, newStatus);
-      } catch (error) {
-        console.error("Blockchain update failed:", error);
-        toast.error("Failed to update on blockchain");
-        return;
-      }
-
-      // Then update database
+      // First update database
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/complaints/handleComlplaints/superUser?state=${statusValue}`,
         {
@@ -91,7 +81,15 @@ const Complaintview = ({
       );
 
       if (response.data) {
-        toast.success("Status updated successfully");
+        // Then update blockchain
+        const newStatus = statusValue === "true" ? "Completed" : "Park";
+        try {
+          await updateComplaintStatusOnChain(complaintDetails.firId, newStatus);
+          toast.success("Status updated successfully in both database and blockchain");
+        } catch (error) {
+          console.error("Blockchain update failed:", error);
+          toast.warning("Database updated but blockchain update failed");
+        }
         // Refresh blockchain data
         const { fetchComplaintFromChain } = await import("../../utils/blockchainUtils");
         const updatedBlockchainData = await fetchComplaintFromChain(complaintDetails.firId);
