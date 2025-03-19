@@ -21,9 +21,29 @@ const Complaintview = ({
   const [remark, setRemark] = useState("");
   // const [status, setStatus] = useState(null);
 
+  const [blockchainData, setBlockchainData] = useState(null);
+
   useEffect(() => {
     console.log(complaintDetails);
     setRemark("");
+    
+    // Fetch blockchain data if FIR ID exists
+    if (complaintDetails?.firId) {
+      const fetchBlockchainData = async () => {
+        try {
+          const response = await axios.get(
+            `${API_BASE_URL}/api/v1/complaints/blockchain/${complaintDetails.firId}`
+          );
+          if (response.data?.complaint) {
+            setBlockchainData(response.data.complaint);
+          }
+        } catch (error) {
+          console.error("Failed to fetch blockchain data:", error);
+          toast.warning("Unable to fetch blockchain verification data");
+        }
+      };
+      fetchBlockchainData();
+    }
   }, [complaintDetails]);
 
   // useEffect(() => {
@@ -477,6 +497,34 @@ const Complaintview = ({
                 }
               </div>
             )}
+
+          {blockchainData && (
+            <div className="border-gray-300 space-y-3 p-4 relative border-4 w-full flex flex-col rounded-2xl">
+              <div className="absolute font-poppins font-bold bg-white px-2 text-xl -top-3 left-2">
+                Blockchain Verification
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Status:</span>
+                  <span className={`px-2 py-1 rounded ${
+                    blockchainData.status === "Completed" ? "bg-green-100 text-green-800" : 
+                    blockchainData.status === "Park" ? "bg-yellow-100 text-yellow-800" : 
+                    "bg-blue-100 text-blue-800"
+                  }`}>
+                    {blockchainData.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Timestamp:</span>
+                  <span>{new Date(parseInt(blockchainData.timestamp) * 1000).toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Evidence Hash:</span>
+                  <span className="text-sm font-mono">{blockchainData.evidenceHash}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {complaintDetails &&
             complaintDetails.Evidence &&
