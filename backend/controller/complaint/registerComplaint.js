@@ -181,17 +181,6 @@ exports.register = async (req, res) => {
       Categories,
     });
 
-    // Return data needed for blockchain storage
-    const blockchainData = {
-      firId: firId.toString(),
-      evidenceUrls: uploadedUrls,
-      complaintData: {
-        incidentDetails: parsedIncidentDetails,
-        summary: Summary,
-        categories: Categories,
-        timestamp: new Date().toISOString()
-      }
-    };
 
     if (userId) {
       await user.updateOne(
@@ -215,33 +204,6 @@ exports.register = async (req, res) => {
   }
 };
 
-const uploadToIPFS = async (data) => {
-  try {
-    const jsonData = JSON.stringify(data);
-    
-    const response = await axios.post(
-      "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-      {
-        pinataContent: jsonData,
-        pinataMetadata: { name: "ComplaintData" },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          pinata_api_key: PINATA_API_KEY,
-          pinata_secret_api_key: PINATA_SECRET_API_KEY,
-        },
-      }
-    );
-
-    const ipfsHash = response.data.IpfsHash;
-    logger.info(`Pinata IPFS Hash: ${ipfsHash}`);
-    return ipfsHash; // Return IPFS CID
-  } catch (err) {
-    logger.error("Error uploading to Pinata IPFS:", err);
-    throw err;
-  }
-};
 
 
 const categories = [

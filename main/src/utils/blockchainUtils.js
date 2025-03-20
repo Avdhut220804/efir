@@ -1,21 +1,10 @@
 
 import web3 from '../ethereum/web3';
 import contract from '../ethereum/contract';
-// import ContractJSON from '../ethereum/contracts/build/ComplaintRegistry.json';
-// import { uploadToIPFS } from './ipfsUtils';
 
-// const web3 = new Web3(Web3.givenProvider || 'http://localhost:8545');
-// const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
-// const contract = new web3.eth.Contract(ContractJSON.abi, contractAddress);
 
 export const fileComplaintOnChain = async (firId, evidenceUrls, complaintData) => {
   try {
-    // console.log('Starting blockchain storage...');
-    
-    // const evidenceHash = await uploadToIPFS(evidenceUrls);
-    // const metadataHash = await uploadToIPFS(complaintData);
-    
-    // console.log('Generated hashes:', { evidenceHash, metadataHash });
     console.log('getting accounts...');
     const accounts = await web3.eth.getAccounts();
     if (!accounts || accounts.length === 0) {

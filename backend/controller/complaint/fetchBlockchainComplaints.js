@@ -1,1 +1,0 @@
-// This file can be deleted as the functionality is moved to frontend
