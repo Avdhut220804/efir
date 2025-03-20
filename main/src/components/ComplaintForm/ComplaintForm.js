@@ -9,7 +9,7 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import FirId from "./FirId";
 import API_BASE_URL from '../../config/api';
-import { uploadToIPFS } from "../../utils/ipfsUtils";
+// import { uploadToIPFS } from "../../utils/ipfsUtils";
 import { fileComplaintOnChain } from "../../utils/blockchainUtils";
 
 const ComplaintForm = ({ currentUser }) => {
@@ -34,6 +34,37 @@ const ComplaintForm = ({ currentUser }) => {
   const [anonymous, setAnonymous] = useState(!currentUser);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastIdRef = useRef(null);
+
+  const PINATA_API_KEY = "4911ccd3d59ae087ce82";
+const PINATA_SECRET_API_KEY = "529526f6455caa78f6b71385004e959cf5efe8f5b403c8dcf43a7e68be5380bd";
+
+  const uploadToIPFS = async (data) => {
+    try {
+      const jsonData = JSON.stringify(data);
+  
+      const response = await axios.post(
+        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        {
+          pinataContent: jsonData,
+          pinataMetadata: { name: "ComplaintData" },
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            pinata_api_key: PINATA_API_KEY,
+            pinata_secret_api_key: PINATA_SECRET_API_KEY,
+          },
+        }
+      );
+  
+      const ipfsHash = response.data.IpfsHash;
+      console.log('Pinata IPFS Hash:', ipfsHash);
+      return ipfsHash;
+    } catch (err) {
+      console.error('Error uploading to Pinata IPFS:', err);
+      throw err;
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -99,11 +130,14 @@ const ComplaintForm = ({ currentUser }) => {
       setDisplayFirId(firId);
 
       const { blockchainData } = response.data;
+      const evidenceHash = await uploadToIPFS(blockchainData.evidenceUrls);
+      const metadataHash = await uploadToIPFS(blockchainData.complaintData);
+      console.log(evidenceHash);
       setTimeout(() => {
         fileComplaintOnChain(
           blockchainData.firId,
-          'QmPmY8HfFQ58FmTb3LcNSELvJZePk8zgPfrhxq444fnexi',
-          'QmPmY8HfFQ58FmTb3LcNSELvJZePk8zgPfrhxq444fnexi'
+          evidenceHash,
+          metadataHash
         ).catch(error => {
           console.error("Blockchain storage failed:", error);
         });
