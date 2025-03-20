@@ -6,8 +6,6 @@ const cloudinary = require("cloudinary").v2;
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEN_AI);
-const web3 = require('../../config/web3');
-const contract = require('../../config/contract');
 const pino = require('pino');
 const logger = pino(pino.transport({
   target: 'pino-pretty',
